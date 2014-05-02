@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.2.min.js"></script>
+    <script>
+      var g_colors = ['red','green','red','green',
+	            'red','green','red','yellow',
+	            'yellow','blue','blue','orange',
+	            'orange','orange'];
+      var g_positions = [[30,60],[50,60],[70,60],[90,60],
+                       [110,60],[130,60],[150,60],
+                       [30,90],[50,90],[70,90],[90,90],
+                       [110,90],[130,90],[150,90]]
+
+      var g_states = [0,0,0,0,1,1,1,
+                    0,0,0,0,1,1,1];
+      var g_leds = []; 
+
+      function drawSwitches(layer,states,positions)
+      {
+        for(var i =0; i < 14; i++){
+            var rect = new Kinetic.Rect({
+            x: positions[i][0]+330,
+            y: positions[i][1]-8,
+            width: 8,
+            height: 16,
+            fill: 'white',
+            stroke: 'black',
+            strokeWidth: 1
+          });
+          layer.add(rect);
+          var switchPos;
+          var pos = positions[i];
+          if(states[i])
+  	    switchPos = new Kinetic.Rect({
+             x: pos[0]+330,
+             y: pos[1]-8,
+             width: 8,
+             height: 8,
+             fill: 'black',
+             stroke: 'black',
+             strokeWidth: 1,
+             draggable: false,
+             myindex: i
+            });
+          else
+            switchPos = new Kinetic.Rect({
+             x: pos[0]+330,
+             y: pos[1],
+             width: 8,
+             height: 8,
+             fill: 'black',
+             stroke: 'black',
+             strokeWidth: 1,
+             draggable: false,
+             myindex: i
+            });
+          switchPos.myindex = i;
+	  layer.add(switchPos);
+          switchPos.on('mousedown', function() {
+            var i = this.myindex;
+            if(states[i]){
+              states[i] = 0;
+              this.move({x: 0,
+                         y: 8
+                        });
+              g_leds[i].fill('black');
+            }
+            else{
+              states[i] = 1;
+              this.move({x: 0,
+                         y: -8
+                        });
+              g_leds[i].fill(g_colors[i]);
+            }
+            layer.draw();
+          });
+          switchPos.on('mouseover', function() {
+            document.body.style.cursor = 'pointer';
+          });
+          switchPos.on('mouseout', function() {
+            document.body.style.cursor = 'default';
+          });
+        }	
+      }
+
+      function drawLed(layer, color, pos)
+      {
+        var ledCircle = new Kinetic.Circle({
+        x: pos[0],
+        y: pos[1],
+        radius: 8,
+        fill: color,
+        stroke: 'black'
+        });
+        layer.add(ledCircle);
+        g_leds.push(ledCircle);
+      }
+
+      function drawLeds(layer, states, positions, colors)
+      {
+        for(var i =0; i < 14; i++){
+          var color;
+          var pos = positions[i];
+          if(states[i]) color = colors[i];
+          else color = 'black';
+          drawLed(layer,color,pos)
+        }
+      }
+
+      function drawBoard(layer)
+      {
+        var box = new Kinetic.Rect({
+          x: 10,
+          y: 10,
+          width: 300,
+          height: 150,
+          fill: '#00D2FF',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: false
+        });
+
+        var box2 = new Kinetic.Rect({
+          x: 330,
+          y: 10,
+          width: 300,
+          height: 150,
+          fill: '#00D2FF',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: false
+        });
+
+        // add cursor styling
+	
+        layer.add(box);
+        layer.add(box2);
+        drawLeds(layer,g_states,g_positions,g_colors);
+        drawSwitches(layer,g_states,g_positions) 
+
+      }
+    </script>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script defer="defer">
+      var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 900,
+        height: 400
+      });
+      var layer = new Kinetic.Layer();
+      drawBoard(layer);
+
+      stage.add(layer);
+    </script>
+  </body>
+</html>
